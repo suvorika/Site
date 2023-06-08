@@ -7,7 +7,7 @@ from flask_login import current_user, logout_user, login_required, login_user
 from werkzeug.utils import redirect
 
 from blog import bcrypt, db
-from blog.models import User
+from blog.models import Post, User
 from blog.user.forms import LoginForm, RegistrationForm
 
 users = Blueprint("users", __name__)
@@ -58,7 +58,7 @@ def login():
         else:
             flash(
                 "Войти не удалось. Пожалуйста, првоерьте электронную почту или пароль",
-                "danger"
+                "danger",
             )
     return render_template("login.html", form=form, title="Логин", legend="Войти")
 
@@ -67,6 +67,21 @@ def login():
 @login_required
 def account():
     return render_template("account.html")
+
+
+@users.route("/user/<string:username>")
+def user_posts(username):
+    page = request.args.get("page", 1, type=int)
+    user = User.query.filter_by(username=username).first_or_404()
+    posts = (
+        Post.query.filter_by(author=user)
+        .order_by(Post.date_posted.desc())
+        .paginate(page=page, per_page=3)
+    )
+
+    return render_template(
+        "user/user_posts.html", title="Блог>", posts=posts, user=user
+    )
 
 
 @users.route("/logout")
