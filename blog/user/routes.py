@@ -8,7 +8,8 @@ from werkzeug.utils import redirect
 
 from blog import bcrypt, db
 from blog.models import Post, User
-from blog.user.forms import LoginForm, RegistrationForm
+from blog.user.forms import LoginForm, RegistrationForm, UpdateAccountForm
+from blog.user.utils import save_picture
 
 users = Blueprint("users", __name__)
 
@@ -66,7 +67,45 @@ def login():
 @users.route("/account", methods=["GET", "POST"])
 @login_required
 def account():
-    return render_template("account.html")
+    user = User.query.filter_by(username=current_user.username).first()
+    posts = Post.query.all()
+    users = User.query.all()
+    form = UpdateAccountForm()
+
+    if request.method == "GET":
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+    elif form.validate_on_submit():
+        path_one = os.path.join(os.getcwd(), f'blog/static/profile_pics/{user.username}')
+        path_two = os.path.join(os.getcwd(), f'blog/static/profile_pics/{form.username.data}')
+        os.rename(path_one, path_two)
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+
+        if form.picture.data:
+            current_user.image_file = save_picture(form.picture.data)
+        else:
+            form.picture.data = current_user.image_file
+
+        db.session.commit()
+        flash("Ваш аккаунт был обновлён!", "success")
+        return redirect(url_for("user.account"))
+    image_file = url_for(
+        "static",
+        filename=f"profile_pics/"
+        + current_user.username
+        + "/account_image/"
+        + current_user.image_file,
+    )
+    return render_template(
+        "account.html",
+        tittle="Аккаунт",
+        users=users,
+        posts=posts,
+        user=user,
+        image_file=image_file,
+        form=form,
+    )
 
 
 @users.route("/user/<string:username>")
