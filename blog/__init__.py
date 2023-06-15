@@ -3,6 +3,7 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
+from flask_mail import Mail
 
 
 db = SQLAlchemy()
@@ -13,6 +14,8 @@ login_manager = LoginManager()
 login_manager.login_view = "users.login"
 login_manager.login_message_category = "info"
 login_manager.login_message = "Авторизуйтесь, что бы попасть на эту страницу!"
+
+mail = Mail()
 
 
 def create_app():
@@ -25,9 +28,11 @@ def create_app():
     from blog.main.routes import main
     from blog.user.routes import users
     from blog.post.routes import posts
+    from blog.errors.handlers import errors
 
     app.register_blueprint(main)
     app.register_blueprint(users)
     app.register_blueprint(posts)
+    app.register_blueprint(errors)
 
     return app

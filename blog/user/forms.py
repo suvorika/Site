@@ -45,19 +45,49 @@ class UpdateAccountForm(FlaskForm):
         "Имя пользователя", validators=[DataRequired(), Length(min=4, max=20)]
     )
     email = StringField("Емайл", validators=[DataRequired(), Email()])
-    picture = FileField('Изображения (png, jpg)', validators=[FileAllowed(['jpq', 'png']), ])
-    submit = SubmitField('Обновить')
+    picture = FileField(
+        "Изображения (png, jpg)",
+        validators=[
+            FileAllowed(["jpq", "png"]),
+        ],
+    )
+    submit = SubmitField("Обновить")
 
     def validate_username(self, username):
         if username.data != current_user.username:
             user = User.query.filter_by(username=username.data).first()
             if user:
-                flash('Это имя уже занято. Пожалуйста, выберите другое', 'danger')
-                raise ValidationError('That username is taken. Please choose a different one')
+                flash("Это имя уже занято. Пожалуйста, выберите другое", "danger")
+                raise ValidationError(
+                    "That username is taken. Please choose a different one"
+                )
 
     def validate_email(self, email):
         if email.data != current_user.email:
             user = User.query.filter_by(email=email.data).first()
             if user:
-                flash('Этот Емайл уже занят. Пожалуйста, введите другой', 'danger')
-                raise ValidationError('That email is taken. Please choose a different one')
+                flash("Этот Емайл уже занят. Пожалуйста, введите другой", "danger")
+                raise ValidationError(
+                    "That email is taken. Please choose a different one"
+                )
+
+
+class RequestResetForm(FlaskForm):
+    email = StringField("Емайл", validators=[DataRequired(), Email()])
+    submit = SubmitField("Сбросить пароль")
+
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user is None:
+            flash("Нет аккаунта с такой электронной почтой", "danger")
+            raise ValidationError(
+                "There is no account with that email. You must register first"
+            )
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField("Пароль", validators=[DataRequired()])
+    confirm_password = PasswordField(
+        "Подтвердите пароль", validators=[DataRequired(), EqualTo("password")]
+    )
+    submit = SubmitField("Сбросить пароль")

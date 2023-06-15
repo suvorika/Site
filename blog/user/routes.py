@@ -2,16 +2,23 @@ import os
 import shutil
 from datetime import datetime
 
-from flask import Blueprint, render_template, flash, request, url_for
+import sqlalchemy
+from flask import Blueprint, render_template, flash, url_for, request
 from flask_login import current_user, logout_user, login_required, login_user
 from werkzeug.utils import redirect
 
 from blog import bcrypt, db
-from blog.models import Post, User
-from blog.user.forms import LoginForm, RegistrationForm, UpdateAccountForm
-from blog.user.utils import save_picture
+from blog.models import User, Post
+from blog.user.forms import (
+    RegistrationForm,
+    LoginForm,
+    UpdateAccountForm,
+    ResetPasswordForm,
+    RequestResetForm,
+)
+from blog.user.utils import save_picture, random_avatar, send_reset_email
 
-users = Blueprint("users", __name__)
+users = Blueprint("user", __name__, template_folder="templates")
 
 
 @users.route("/register", methods=["GET", "POST"])
@@ -24,21 +31,18 @@ def register():
             "utf-8"
         )
         user = User(
-            username=form.username.data, email=form.email.data, password=hashed_password
+            username=form.username.data,
+            email=form.email.data,
+            password=hashed_password,
+            image_file=random_avatar(form.username.data),
         )
         db.session.add(user)
         db.session.commit()
 
-        full_path = os.path.join(
-            os.getcwd(), "blog/static", "profile_pics", user.username
-        )
-        if not os.path.exists(full_path):
-            os.mkdir(full_path)
-        shutil.copy(f"{os.getcwd()}/blog/static/profile_pics/default.jpg", full_path)
         flash("Ваш аккаунт был создан. Вы можете войти на блог", "success")
-        return redirect(url_for("users.login"))
+        return redirect(url_for("user.login"))
     return render_template(
-        "register.html", form=form, title="Регистрация", legend="Регистрация"
+        "user/register.html", form=form, title="Регистрация", legend="Регистрация"
     )
 
 
@@ -52,16 +56,16 @@ def login():
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
             next_page = request.args.get("next")
-            flash("Вы вошли как пользователь {current_user.username}", "info")
+            flash(f"Вы вошли как пользователь {current_user.username}", "info")
             return (
-                redirect(next_page) if next_page else redirect(url_for("users.account"))
+                redirect(next_page) if next_page else redirect(url_for("user.account"))
             )
         else:
             flash(
-                "Войти не удалось. Пожалуйста, првоерьте электронную почту или пароль",
+                "Войти не удалось. Пожалуйста, проверьте электронную почту или пароль",
                 "danger",
             )
-    return render_template("login.html", form=form, title="Логин", legend="Войти")
+    return render_template("user/login.html", form=form, title="Логин", legend="Войти")
 
 
 @users.route("/account", methods=["GET", "POST"])
@@ -76,8 +80,12 @@ def account():
         form.username.data = current_user.username
         form.email.data = current_user.email
     elif form.validate_on_submit():
-        path_one = os.path.join(os.getcwd(), f'blog/static/profile_pics/{user.username}')
-        path_two = os.path.join(os.getcwd(), f'blog/static/profile_pics/{form.username.data}')
+        path_one = os.path.join(
+            os.getcwd(), f"blog/static/profile_pics/{user.username}"
+        )
+        path_two = os.path.join(
+            os.getcwd(), f"blog/static/profile_pics/{form.username.data}"
+        )
         os.rename(path_one, path_two)
         current_user.username = form.username.data
         current_user.email = form.email.data
@@ -94,17 +102,17 @@ def account():
         "static",
         filename=f"profile_pics/"
         + current_user.username
-        + "/account_image/"
+        + "/account_img/"
         + current_user.image_file,
     )
     return render_template(
-        "account.html",
-        tittle="Аккаунт",
-        users=users,
-        posts=posts,
-        user=user,
+        "user/account.html",
+        title="Аккаунт",
         image_file=image_file,
         form=form,
+        posts=posts,
+        users=users,
+        user=user,
     )
 
 
@@ -123,8 +131,70 @@ def user_posts(username):
     )
 
 
-@users.route("/logout")
+@users.route("/user_delete/<string:username>", methods=["GET", "POST"])
 @login_required
+def delete_user(username):
+    try:
+        user = User.query.filter_by(username=username).first_or_404()
+        if user and user.id != 1:
+            db.session.delete(user)
+            db.session.commit()
+            full_path = os.path.join(
+                os.getcwd(), "blog/static", "profile_pics", user.username
+            )
+            shutil.rmtree(full_path)
+
+            flash(f"Пользователь {username} был удалён!", "info")
+            return redirect(url_for("user.account"))
+
+    except sqlalchemy.exc.IntegrityError:
+        flash(f"У пользователя {username} есть контент!", "warning")
+        return redirect(url_for("user.account"))
+    except FileNotFoundError:
+        return redirect(url_for("user.account"))
+
+    else:
+        flash("Администрация!", "info")
+        return redirect(url_for("user.account"))
+
+
+@users.route("/reset_password", methods=["GET", "POST"])
+def reset_request():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.blog"))
+    form = RequestResetForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        send_reset_email(user)
+        flash(
+            "На указанный емайл были отправлены инструкции по восстановлению пароля",
+            "info",
+        )
+        return redirect(url_for("user.login"))
+    return render_template("user/reset_request.html", form=form, title="Сброс пароля")
+
+
+@users.route("/reset_password/<token>", methods=["GET", "POST"])
+def reset_token(token):
+    if current_user.is_authenticated:
+        return redirect(url_for("main.blog"))
+    user = User.verify_reset_token(token)
+    if user is None:
+        flash("Не правильный или просроченный токен", "warning")
+        return redirect(url_for("user.reset_request"))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode(
+            "utf-8"
+        )
+        user.password = hashed_password
+        db.session.commit()
+        flash("Ваш пароль был обновлён! Вы можете войти на блог", "success")
+        return redirect(url_for("user.login"))
+    return render_template("user/reset_token.html", form=form, title="Сброс пароля")
+
+
+@users.route("/logout")
 def logout():
     current_user.last_seen = datetime.now()
     db.session.commit()
