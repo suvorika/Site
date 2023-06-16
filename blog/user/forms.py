@@ -3,7 +3,14 @@ from flask_login import current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, FileField
-from wtforms.validators import DataRequired, EqualTo, Length, Email, ValidationError
+from wtforms.validators import (
+    DataRequired,
+    EqualTo,
+    Length,
+    Email,
+    ValidationError,
+    InputRequired,
+)
 from blog.models import User
 
 
@@ -38,6 +45,11 @@ class LoginForm(FlaskForm):
     password = PasswordField("Пароль", validators=[DataRequired()])
     remember = BooleanField("Запомнить меня")
     submit = SubmitField("Войти")
+
+
+class AddCommentForm(FlaskForm):
+    body = StringField("Ваш комментарий", validators=[InputRequired()])
+    submit = SubmitField("Опубликовать")
 
 
 class UpdateAccountForm(FlaskForm):

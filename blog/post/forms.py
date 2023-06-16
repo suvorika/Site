@@ -20,3 +20,8 @@ class PostUpdateForm(FlaskForm):
         "Изображение (png, jpg)", validators=[FileAllowed(["jpg", "png"])]
     )
     submit = SubmitField("Опубликовать")
+
+
+class CommentUpdateForm(FlaskForm):
+    body = StringField("Заголовок", validators=[DataRequired()])
+    submit = SubmitField("Опубликовать")

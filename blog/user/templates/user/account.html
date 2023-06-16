@@ -15,7 +15,7 @@
                 <img src="{{ url_for('static', filename='profile_pics/' + user.username + '/' + 'account_img' + '/' + user.image_file) }}" alt="" class="mr-3 mt-3 rounded-circle" style="width:40px;">
                 <a href="{{ url_for('user.user_posts', username=user.username)}}">{{ user.username }}</a>
                 </div>
-                <!-- <h6 style="color:red"><a href="{{ url_for('users.delete_user', username=user.username) }}">удалить</a>?</h6> -->
+                <h6 style="color:red"><a href="{{ url_for('user.delete_user', username=user.username) }}">удалить</a>?</h6>
             {% else %}
                 <li> <a href="{{ url_for('user.user_posts', username=user.username)}}">{{ user.username }}</a>
             {% endif %}

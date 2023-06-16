@@ -1,14 +1,14 @@
 from flask import Blueprint, render_template, request, url_for
-from flask_login import current_user, login_required
+from flask_login import login_required, current_user
 
 from blog.models import Post, User
 
-main = Blueprint("main", __name__)
+main = Blueprint("main", __name__, template_folder="templates")
 
 
 @main.route("/")
 def home():
-    return render_template("index.html", title="Мысли")
+    return render_template("main/index.html", title="Главная")
 
 
 @main.route("/blog", methods=["POST", "GET"])
@@ -42,29 +42,29 @@ def blog():
 
 @main.route("/html_page")
 def html_page():
-    return render_template("html_page.html")
+    return render_template("main/html_page.html")
 
 
 @main.route("/css_page")
 def css_page():
-    return render_template("css_page.html")
+    return render_template("main/css_page.html")
 
 
 @main.route("/js_page")
 def js_page():
-    return render_template("js_page.html")
+    return render_template("main/js_page.html")
 
 
 @main.route("/python_page")
 def python_page():
-    return render_template("python_page.html")
+    return render_template("main/python_page.html")
 
 
 @main.route("/flask_page")
 def flask_page():
-    return render_template("flask_page.html")
+    return render_template("main/flask_page.html")
 
 
 @main.route("/django_page")
 def django_page():
-    return render_template("django_page.html")
+    return render_template("main/django_page.html")

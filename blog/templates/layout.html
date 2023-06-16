@@ -1,53 +1,74 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
+
   <meta charset="UTF-8">
+    <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='icon/favicon.ico') }}">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/media_css.css')}}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
+          integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/media_css.css')}}">
+                <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
 
 
   {% block title %}
-  <title>{{ title if title else 'Flask Blog' }}</title>
+
+    <title>{{ title if title else 'Flask-blog' }}</title>
+
   {% endblock title %}
+
 </head>
 
 <body>
-  <div class="wrapper">
-    {% block menu %}
-    <header class="header">
-      <div class="logo">
+<div class="wrapper">
+
+{% block menu %}
+<header class="header">
+
+    <div class="logo">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo">
-      </div>
-      <ul class="main_menu">
-        {% if current_user.is_authenticated %}
+
+    </div>
+
+    <ul class="main_menu">
+{% if current_user.is_authenticated %}
+
+
         <li><a href="{{ url_for('main.home') }}">Главная</a></li>
         <li><a href="{{ url_for('main.blog') }}">Блог</a></li>
-        <li><a href="{{ url_for('post.new_post') }}">Создать</a></li>
-        <li><a href="{{ url_for('users.account') }}">Аккаунт</a></li>
-        <li><a href="{{ url_for('users.logout') }}">Выход</a></li>
+        <li><a href="{{ url_for('user.account') }}">Аккаунт</a></li>
+        <li><a href="{{ url_for('user.logout') }}">Выход</a></li>
+
+        <div class="online_status">
+            <div class="online_user"></div>
+            <div class="current_user"><small>{{ current_user.username }}</small></div>
+        </div>
+
+
         {% else %}
         <li><a href="{{ url_for('main.home') }}">Главная</a></li>
-        <li><a href="{{ url_for('users.register') }}">Регистрация</a></li>
-        <li><a href="{{ url_for('users.login') }}">Логин</a></li>
+        <li><a href="{{ url_for('user.register') }}">Регистрация</a></li>
+        <li><a href="{{ url_for('user.login') }}">Логин</a></li>
+
+
         {% endif %}
-      </ul>
-    </header>
-    {% endblock menu %}
+
+    </ul>
+
+</header>
+{% endblock menu %}
 
 
     <div class="content">
-      <main role="main" class="#">
-        <div class="row">
-          <div class="col-md-12">
+
+<main role="main" class="#">
+            <div class="row">
+            <div class="col-md-12">
             {% with messages = get_flashed_messages(with_categories=True) %}
 
             {% if messages %}
             {% for category, message in messages %}
             <div class="alert alert-{{ category }}">
-              {{ message }}
+                {{ message }}
             </div>
             {% endfor %}
             {% endif %}
@@ -55,27 +76,32 @@
             {% endwith %}
 
             {% block content %}
-            {% endblock content %}
-          </div>
+                {% endblock content %}
         </div>
-      </main>
+        </div>
+
+        </main>
+
     </div>
 
 
-    {% block main_page %}
-    {% endblock main_page %}
+{% block main_page %}
 
-    <!-- Option 1: Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
-      crossorigin="anonymous"></script>
+{% endblock main_page %}
 
-    {% block footer %}
+<!-- Option 1: Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
+        crossorigin="anonymous"></script>
+
+{% block footer %}
+
     <footer class="footer">Все права защищены!<br>
-      &#169; Андроген 2023
-    </footer>
-    {% endblock footer %}
-  </div>
-</body>
+        &#169; Терехов Михаил 2021
 
+    </footer>
+
+{% endblock footer %}
+</div>
+</body>
 </html>
