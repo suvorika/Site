@@ -5,60 +5,62 @@
 <div class="register_form sign_in">
     <form action="" method="POST">
 
-        {{ form.hidden_tag() }}
+        {{ form_registration.hidden_tag() }}
         <legend class="legend">{{ legend }}</legend>
 
-        {% if form.username.errors %}
-        {{ form.username(class='form-post-title is-invalid', placeholder='Имя пользователя') }}
+        {% if form_registration.username.errors %}
+        {{ form_registration.username(class='form-post-title is-invalid', placeholder='Имя пользователя') }}
         <div class="invalid-feedback">
-            {% for errors in form.username.errors %}
+            {% for errors in form_registration.username.errors %}
             <span>{{ error }}</span>
             {% endfor %}
         </div>
         {% else %}
-        {{ form.username(class='form-post-title', placeholder='Имя пользователя') }}
+        {{ form_registration.username(class='form-post-title', placeholder='Имя пользователя') }}
         {% endif %}
 
-        {% if form.email.errors %}
-        {{ form.email(class='form-post-title is-invalid', placeholder='Емайл') }}
+        {% if form_registration.email.errors %}
+        {{ form_registration.email(class='form-post-title is-invalid', placeholder='Емайл') }}
         <div class="invalid-feedback">
-            {% for errors in form.email.errors %}
+            {% for errors in form_registration.email.errors %}
             <span>{{ error }}</span>
             {% endfor %}
         </div>
         {% else %}
-        {{ form.email(class='form-post-title', placeholder='Емайл') }}
+        {{ form_registration.email(class='form-post-title', placeholder='Емайл') }}
         {% endif %}
 
-        {% if form.password.errors %}
-        {{ form.password(class='form-post-title is-invalid', placeholder='Пароль') }}
+        {% if form_registration.password.errors %}
+        {{ form_registration.password(class='form-post-title is-invalid', placeholder='Пароль') }}
         <div class="invalid-feedback">
-            {% for errors in form.password.errors %}
+            {% for errors in form_registration.password.errors %}
             <span>{{ error }}</span>
             {% endfor %}
         </div>
         {% else %}
-        {{ form.password(class='form-post-title', placeholder='Пароль') }}
+        {{ form_registration.password(class='form-post-title', placeholder='Пароль') }}
         {% endif %}
 
-        {% if form.confirm_password.errors %}
-        {{ form.confirm_password(class='form-post-title is-invalid', placeholder='Подтвердите пароль') }}
+        {% if form_registration.confirm_password.errors %}
+        {{ form_registration.confirm_password(class='form-post-title is-invalid', placeholder='Подтвердите пароль') }}
         <div class="invalid-feedback">
-            {% for errors in form.confirm_password.errors %}
+            {% for errors in form_registration.confirm_password.errors %}
             <span>{{ error }}</span>
             {% endfor %}
         </div>
         {% else %}
-        {{ form.confirm_password(class='form-post-title', placeholder='Подтвердите пароль') }}
+        {{ form_registration.confirm_password(class='form-post-title', placeholder='Подтвердите пароль') }}
         {% endif %}
+
+        {{ form_registration.role() }}
 
 
         <div class="form-group_button">
            <div class="btn">
-                {{ form.submit(class='btn_sign_in') }}
+                {{ form_registration.submit(class='btn_sign_in') }}
            </div>
               <small class="text-muted">
-            <a class='ml-2' href="{{ url_for('user.login')}}">Уже есть аккаунт? </a>
+            <a class='ml-2' href="{{ url_for('users.login')}}">Уже есть аккаунт? </a>
         </small>
         </div>
 
@@ -69,6 +71,5 @@
 </div>
 
 
-</div>
 
 {% endblock content%}

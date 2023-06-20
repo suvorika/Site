@@ -10,7 +10,9 @@ SECRET_KEY = os.urandom(36)
 SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
 SQLALCHEMY_TRACK_MODIFICATIONS = os.environ.get("SQLALCHEMY_TRACK_MODIFICATIONS")
 
-REMEMBER_COOKIE_DURATION = timedelta(minutes=5)
+UPLOAD_FOLDER = os.path.join(basedir, 'blog', 'static', 'profile_pics', 'users')
+
+REMEMBER_COOKIE_DURATION = timedelta(seconds=60)
 
 
 MAIL_USERNAME = os.environ.get("EMAIL_USER")
