@@ -268,6 +268,7 @@ def delete_post(slug):
 
 
 # post = Post.query.filter_by(slug=single_comment.comment_post.slug).first()
+# Post(1, New post, 2021-12-15 12:34:24.444376, bf3f68498d4e8ef464e1ee806d933f1b.jpg, 1)
 
 
 @posts.route("/post/comment/<int:comment_id>/delete")
